@@ -1,0 +1,16 @@
+{
+  "name": "fullstack-challenge",
+  "version": "1.0.0",
+  "description": "\"reto de programacion fullstack edgewaters\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "start": "node index.js"
+  },
+  "author": "Gerardo Flores Barrié",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.15.2",
+    "socket.io": "^2.3.0"
+  }
+}
