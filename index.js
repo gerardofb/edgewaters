@@ -27,6 +27,19 @@ io.on('connection', function(socket){
         if(message.type=="userMessage"){
             socket.send(JSON.stringify(message));
         }
+        if(message.type=="privateMessage"){
+            let mensaje = {type:"privateMessage", message:message.message};
+            socket.in(message.roomName).broadcast.send(JSON.stringify(mensaje));
+        }
     });
+    socket.on("login_user",function(room){
+        console.log('iniciando sala '+room.name);
+        socket.join(room.name);
+        socket.room = room.name;
+        let mensajesala = "El usuario "+room.name+" ha iniciado una sala privada";
+        socket.send(JSON.stringify(
+            {type:"loginMessage",message:mensajesala}));
+    });
+
 });
 
