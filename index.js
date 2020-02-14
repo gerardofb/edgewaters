@@ -2,12 +2,15 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+const rediscliente = require('redis');
+const redis = require('socket.io-redis');
 const identificadorfile = require("guid");
 const fs = require('fs');
 const csv = require('csv-parser')
 let salasActivas = [];
 const protocol = require('https');
+const modelo = require('./models');
+const controlador = require('./controlador');
 function getFilesizeInBytes(filename) {
     var stats = fs.statSync(filename)
     var fileSizeInBytes = stats["size"]
@@ -18,9 +21,18 @@ app.get('/', function(req, res){
     res.sendFile(path.join(__dirname, '/index.html'))
 });
 app.use("/", express.static(path.join(__dirname, '/')));
-http.listen(4000, function(){
+var server = http.listen(4000, function(){
     console.log("servidor escuchando en el puerto 4000");
 });
+const io_s = require('socket.io')(server);
+const cliente = rediscliente.createClient();
+cliente.subscribe("edgewaters");
+io_s.adapter(redis({
+    host: '127.0.0.1',
+    port: 6379,
+    subClient:cliente,
+}));
+const io = io_s;
 io.on('connection', function(socket){
     console.log('se ha conectado un usuario');
     socket.send(JSON.stringify(
@@ -57,8 +69,9 @@ io.on('connection', function(socket){
                         console.log(results);
                         let precio = results.length > 0 && !isNaN(parseFloat(results[0].High))
                         ? parseFloat(results[0].High) : "INDEFINIDO";
+                        console.log('precio '+precio);
                         let accion = message.message.substring(indice,message.message.length).toUpperCase();
-                        let mensaje = {type:"privateMessage", message: "BOT: "+"La cita "+accion+" es $"+precio+" por acción."};
+                        let mensaje = {type:"privateMessage", message: precio != "INDEFINIDO" ? "BOT: "+"La cotización de acciones de "+accion+" es $"+precio+" por acción." : "BOT: No se pudo determinar esta cotización de acción."};
                         io.in(message.roomName).emit("message",JSON.stringify(mensaje));
                     })
                    });
@@ -75,6 +88,8 @@ io.on('connection', function(socket){
         let salas = [];
             io.in(room.name).emit("message",JSON.stringify({type:"loginMessage",message:mensajesala}));
             console.log(io.sockets.adapter.rooms);
+            // GUARDAR EL USUARIO
+            controlador.addUser(room.nickname, room.nickname);
             for(var sala in io.sockets.adapter.rooms){
                 console.log("enumerando salas");
                 console.log(sala);
