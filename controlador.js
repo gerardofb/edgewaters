@@ -1,6 +1,6 @@
 // funciones de manejo de datos
 var saveRedis = require("redis");
-var clienteControlador = saveRedis.createClient(6379, 'redis');
+var clienteControlador = saveRedis.createClient();
 exports.addUser = function addUser(user, name){
     clienteControlador.multi()
     .hset('user:' + user, 'name', name)

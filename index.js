@@ -25,10 +25,10 @@ var server = http.listen(4000, function(){
     console.log("servidor escuchando en el puerto 4000");
 });
 const io_s = require('socket.io')(server);
-const cliente = rediscliente.createClient(6379, 'redis');
+const cliente = rediscliente.createClient();
 cliente.subscribe("edgewaters");
 io_s.adapter(redis({
-    host: 'redis',
+    host: '127.0.0.1',
     port: 6379,
     subClient:cliente,
 }));
