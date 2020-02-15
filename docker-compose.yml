@@ -1,0 +1,39 @@
+version: "3.7"
+services:
+    backend:
+        build: fullstackchallenge
+        command: bash -c "npm start"
+        ports:
+            - "4000:4000"
+        expose:
+            - "4000"
+        networks:
+        - redis
+        hostname: backend
+    frontend:
+        build: chat-stockquotes
+        command: bash -c "npm start"
+        ports:
+            - "3000:3000"
+        expose:
+            - "3000"
+        networks:
+            - redis
+        hostname: frontend
+        links:
+            - backend:backend
+    redis:
+        restart: always
+        image: redis:latest
+        expose:
+            - "6379"
+        ports:
+            - "6479:6479"
+        networks: 
+            - redis
+        command: ["redis-server"]
+        hostname: redis
+networks:
+    redis:
+        driver: bridge
+
