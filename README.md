@@ -11,5 +11,5 @@ usuarios para enviar mensajes privados a los usuarios conectados.
 
 Se utiliza redis como broker de mensajes y para almacenar los datos del chat.
 
-Para correr este proyecto, clonarlo y ejecutar estos comandos: npm install, y despuès npm start.
+Para correr este proyecto, clonarlo y ejecutar estos comandos: `npm install`, y despuès `npm start`.
 
