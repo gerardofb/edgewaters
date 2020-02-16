@@ -11,6 +11,9 @@ let salasActivas = [];
 const protocol = require('https');
 const modelo = require('./models');
 const controlador = require('./controlador');
+const cors = require('cors');
+const desencripta = require('./cryptoutils').verifyPassword;
+const encripta = require('./cryptoutils').hashPassword;
 function getFilesizeInBytes(filename) {
     var stats = fs.statSync(filename)
     var fileSizeInBytes = stats["size"]
@@ -26,7 +29,50 @@ var server = http.listen(4000, function(){
 });
 const io_s = require('socket.io')(server);
 const cliente = rediscliente.createClient();
+// funciones de registro y logueo
+function registerProcess(req, res){
+    console.log('intentando registrar usuario');
+    var registro = req.query;
+    console.log(registro.usuario);
+    console.log(registro.claro);
+    controlador.getUser(registro.usuario, function callbackreg(err,exito){
+        console.log('en intentando registro');
+        console.log(exito);
+        if(exito == null){
+          encripta(registro.claro, function(objeto, encriptado){
+                    console.log('contraseña encriptada');
+                    var base = encriptado.toString("base64");
+                    console.log(base);
+                    controlador.addUser(registro.usuario, base);
+                    res.send({exito:true});
+                });
+        }
+else {
+    res.send({exito:false});
+}});
+}
+function loginProcess(req, res){
+    console.log('intentando iniciar sesión');
+    var login = req.query;
+    console.log(login.claro);
+    controlador.getUserPassword(login.usuario, function(err, reply){
+        var encriptado = new Buffer(reply, "base64");
+        console.log(encriptado);
+    desencripta(login.claro, encriptado, function(objetos, data){
+       if(data){
+            res.send({exito:true});
+        }
+        else{
+            res.send({exito:false});
+        }
+    });
+});
+}
+app.get('/registerprocess', cors(), registerProcess);
+app.get('/loginprocess', cors(), loginProcess);
+// finalizan funciones de registro y logueo
 cliente.subscribe("edgewaters");
+
 io_s.adapter(redis({
     host: '127.0.0.1',
     port: 6379,
@@ -79,6 +125,10 @@ io.on('connection', function(socket){
             }
         }
     });
+    // CABMIAR DE SALA
+    socket.on("cambiarSala", function(cambio){
+        socket.join(cambio.nuevo);
+    })
     socket.on("login_user",function(room){
         console.log('iniciando sala '+room.name);
         socket.join(room.name);
@@ -89,7 +139,7 @@ io.on('connection', function(socket){
             io.in(room.name).emit("message",JSON.stringify({type:"loginMessage",message:mensajesala}));
             console.log(io.sockets.adapter.rooms);
             // GUARDAR EL USUARIO
-            controlador.addUser(room.nickname, room.nickname);
+            
             for(var sala in io.sockets.adapter.rooms){
                 console.log("enumerando salas");
                 console.log(sala);
@@ -102,7 +152,7 @@ io.on('connection', function(socket){
                     }
                 });
             }
-                io.in(room.name).emit("salasSocket",JSON.stringify(salas));
+                io.sockets.emit("salasSocket",JSON.stringify(salas));
     });
     socket.on("list_rooms", function(){
         console.log(io.sockets.adapter.rooms);

@@ -10,8 +10,10 @@
   "author": "Gerardo Flores Barrié",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "csv-parser": "^2.3.2",
     "express": "^4.15.2",
+    "flow-maintained": "^0.2.4",
     "guid": "0.0.12",
     "redis": "0.10.3",
     "socket.io": "^2.3.0",
