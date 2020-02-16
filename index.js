@@ -28,7 +28,7 @@ var server = http.listen(4000, function(){
     console.log("servidor escuchando en el puerto 4000");
 });
 const io_s = require('socket.io')(server);
-const cliente = rediscliente.createClient();
+const cliente = rediscliente.createClient(6379,'redis');
 // funciones de registro y logueo
 function registerProcess(req, res){
     console.log('intentando registrar usuario');
@@ -74,7 +74,7 @@ app.get('/loginprocess', cors(), loginProcess);
 cliente.subscribe("edgewaters");
 
 io_s.adapter(redis({
-    host: '127.0.0.1',
+    host: 'redis',
     port: 6379,
     subClient:cliente,
 }));
