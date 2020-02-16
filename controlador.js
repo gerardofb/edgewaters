@@ -1,7 +1,7 @@
 // funciones de manejo de datos
 const flow = require('flow-maintained');
 var saveRedis = require("redis");
-var clienteControlador = saveRedis.createClient(6379,'redis');
+var clienteControlador = saveRedis.createClient();
 exports.addUser = function addUser(username, password)
 {
     clienteControlador.incr('next:user:id', function(err, userid){
