@@ -127,7 +127,10 @@ io.on('connection', function(socket){
     });
     // CABMIAR DE SALA
     socket.on("cambiarSala", function(cambio){
-        socket.join(cambio.nuevo);
+        console.log('en cambio de room');
+        console.log("sala antigua: "+cambio.old+", sala nueva: "+cambio.nuevo);
+        socket.in(cambio.old).leave(cambio.old);
+        socket.in(cambio.old).join(cambio.nuevo);
     })
     socket.on("login_user",function(room){
         console.log('iniciando sala '+room.name);
